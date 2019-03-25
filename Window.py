@@ -1,7 +1,7 @@
-from tkinter import *
-import cv2
-import numpy as np
-from PIL import ImageGrab
+from tkinter import *       # GUI and drawable canvas
+import cv2                  # Reading in a TIFF image
+import numpy as np          # RGB array
+from PIL import ImageGrab   # Screenshot to convert drawn image
 
 
 ###
@@ -14,22 +14,26 @@ from PIL import ImageGrab
 #  Black background and drawable area is white
 #  Drawed lines are in black
 #
-
 class Window(Tk):
 
-    
-    def __init__(self):
+
+    # Constructor
+    # Takes in filename to save for the image (Will automatically add .TIFF to filename)
+    def __init__(self, filename):
         Tk.__init__(self)
 
-        # Width and height of window
+        # Sizes of window and canvas
         self.width = 300
         self.height = 300
-        
-        self.drawable_width = 100
-        self.drawable_height = 100
+        self.drawable_width = 150
+        self.drawable_height = 150
 
 
-        # Initialzing window
+        # Where to save the image (as a .TIFF)
+        self.filename = str(filename)
+
+
+        # Initialzing window        
         dimensions = str(self.width) + "x" + str(self.height)
         self.geometry(dimensions)
         self.config(bg = 'black')
@@ -39,6 +43,7 @@ class Window(Tk):
         # Menubar for top of window
         menubar = Menu(self)
         menubar.add_command(label="Save", command=self.save)
+        menubar.add_command(label = "Clear", command=self.clear)
         menubar.add_command(label="Quit!", command=self.destroy)
         self.config(menu=menubar)
 
@@ -60,7 +65,7 @@ class Window(Tk):
         self.previous_x = 0
         self.previous_y = 0
 
-
+        
     # Take screenshot of drawable area
     # Save as a .TIFF for exact RGB format of 255 (white) and 0 (black)
     def save(self):
@@ -71,10 +76,12 @@ class Window(Tk):
         drawable_x1=drawable_x0+self.drawing_area.winfo_width()-2  
         drawable_y1=drawable_y0+self.drawing_area.winfo_height()-2
         
-        ImageGrab.grab((2 + drawable_x0, 2 + drawable_y0, drawable_x1,drawable_y1)).save("plz.TIFF")
+        ImageGrab.grab((2 + drawable_x0, 2 + drawable_y0,
+                            drawable_x1,     drawable_y1)).save(self.filename + ".TIFF")
+       
+    def clear(self):
+        self.drawing_area.delete("all") 
 
-
-    # Triggered when user clicks, and allows line to be drawn
     def onClick(self, event):
         self.onClick = True           
 
@@ -92,25 +99,28 @@ class Window(Tk):
         # Creates a line from the previous position to current position
         # If dragged it appears as a smooth line in the direction they're going
         if self.onClick:
-            
-            if self.previous_x is not None and self.previous_y is not None:
-                
+            if self.previous_x and self.previous_y:               
                 event.widget.create_line(self.previous_x, self.previous_y,
                                          event.x,         event.y,
                                          smooth=TRUE,     width = 5)
-            
+                
             self.previous_x = event.x
             self.previous_y = event.y
 
 
 def main():
 
-    w = Window();
+    # Makes window for letter a
+    w = Window("a");
     w.mainloop();
-    image = cv2.imread("plz.TIFF")
+
+    # Reads in our image as an array
+    image = cv2.imread("a.TIFF")
+
+    # Prints out every pixel
     print (type(image))
-    for i in range(image.size):
-        print(image[i])
+    for i in image:
+        print(i)
 
 if __name__ == "__main__":
     main()
