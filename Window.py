@@ -23,10 +23,10 @@ class Window(Tk):
         Tk.__init__(self)
 
         # Sizes of window and canvas
-        self.width = 300
-        self.height = 300
-        self.drawable_width = 150
-        self.drawable_height = 150
+        self.width = 700
+        self.height = 700
+        self.drawable_width = 605
+        self.drawable_height = 600
 
 
         # Where to save the image (as a .TIFF)
@@ -36,7 +36,7 @@ class Window(Tk):
         # Initialzing window        
         dimensions = str(self.width) + "x" + str(self.height)
         self.geometry(dimensions)
-        self.config(bg = 'black')
+        self.config(bg = 'white')
         self.resizable(0,0)
 
         
@@ -49,7 +49,7 @@ class Window(Tk):
 
 
         # Initializing canvas for drawable area
-        self.drawing_area = Canvas(self,  bg = 'white',
+        self.drawing_area = Canvas(self,  bg = 'black',
                                    width = self.drawable_width,
                                    height = self.drawable_height,)
         
@@ -102,25 +102,8 @@ class Window(Tk):
             if self.previous_x and self.previous_y:               
                 event.widget.create_line(self.previous_x, self.previous_y,
                                          event.x,         event.y,
-                                         smooth=TRUE,     width = 5)
+                                         smooth=TRUE,     width = 5, fill = 'white')
                 
             self.previous_x = event.x
             self.previous_y = event.y
 
-
-def main():
-
-    # Makes window for letter a
-    w = Window("a");
-    w.mainloop();
-
-    # Reads in our image as an array
-    image = cv2.imread("a.TIFF")
-
-    # Prints out every pixel
-    print (type(image))
-    for i in image:
-        print(i)
-
-if __name__ == "__main__":
-    main()
