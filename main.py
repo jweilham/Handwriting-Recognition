@@ -1,5 +1,12 @@
 from Window import Window
 import cv2
+import numpy as np
+
+
+
+#  Look into joining contours that are near
+#
+#
 
 def main():
 
@@ -13,10 +20,10 @@ def main():
     copy  = image.copy()
     
     #converts to grayscale for contour functions to work
-    imgGray = cv2.cvtColor(copy, cv2.COLOR_BGR2GRAY)
+    grayscale = cv2.cvtColor(copy, cv2.COLOR_BGR2GRAY)
 
     # Reads in contours (outlines) of objects in image
-    contours, hierarchy = cv2.findContours(imgGray,      
+    contours, hierarchy = cv2.findContours(grayscale,      
                                            cv2.RETR_EXTERNAL,
                                            cv2.CHAIN_APPROX_SIMPLE)    
 
@@ -29,7 +36,7 @@ def main():
     for obj in contours:
         counter += 1
         
-        print(counter, obj)
+        #print(counter, obj)
    
         x,y,w,h = cv2.boundingRect(obj)
 
@@ -44,13 +51,16 @@ def main():
         imgROI = image[y:y+h, x:x+w]
 
         # Resize?
-        imgROIResized = cv2.resize(imgROI, (30, 30))
+        ROI_resized = cv2.resize(imgROI, (30, 30))
+
         
-        cv2.imshow("crop", imgROI)
+        print(cv2.contourArea(obj))
+        cv2.imshow("crop", ROI_resized)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
     cv2.imshow("rectangle", copy)
+
 
 
 if __name__ == "__main__":
