@@ -118,6 +118,7 @@ def main():
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
+        
   
             
     cv2.imshow("rectangle", copy)
@@ -129,35 +130,46 @@ def distance(c1, c2):
 
     n1 = len(c1)
     n2 = len(c2)
+    leftmost1 = tuple(c1[c1[:,:,0].argmin()][0])
+    rightmost1 = tuple(c1[c1[:,:,0].argmax()][0])
+    topmost1 = tuple(c1[c1[:,:,1].argmin()][0])
+    bottommost1 = tuple(c1[c1[:,:,1].argmax()][0])
+
+    leftmost2 = tuple(c2[c2[:,:,0].argmin()][0])
+    rightmost2 = tuple(c2[c2[:,:,0].argmax()][0])
+    topmost2 = tuple(c2[c2[:,:,1].argmin()][0])
+    bottommost2 = tuple(c2[c2[:,:,1].argmax()][0])
+
     
-    for i in range(n1):
 
-        for j in range (n2):
+    if((abs(topmost1[1] - bottommost2[1]) < 50) or (abs(bottommost1[1] - topmost2[1]) < 50)):
 
-            #print("c1: ", c1)
-            #print("c2: ", c2)
-            diffx = 5*abs(c1[i][0][0] - c2[j][0][0])
-            diffy = abs(c1[i][0][1] - c2[j][0][1])
-            dist =  diffy + diffx 
+        if((abs(leftmost1[0] - rightmost2[0]) < 30) or (abs(rightmost1[0] - leftmost2[0]) < 30)):
+               
+            for i in range(n1):
 
-            #print("diffy: " , diffy, " diffx: ", diffx)
-            
-            if(dist < mind):
-                mind = dist
-                #print("adjusted distance: ", mind)
-                #print("x1: ", c1[i][0][0], " x2: ", c2[j][0][0])
-                #print("y1 ", c1[i][0][1], " y2: ", c2[j][0][1])
-                #print("diffy: " , diffy, " diffx: ", diffx)
+                for j in range (n2):
 
-                if(mind < 30):
+                    #print("c1: ", c1)
+                    #print("c2: ", c2)
+                    diffx = 5*abs(c1[i][0][0] - c2[j][0][0])
+                    diffy = abs(c1[i][0][1] - c2[j][0][1])
+                    dist =  diffy + diffx 
 
-                    return True
-                
-    '''if(mind < 50):
-        print("min distance: ", mind)
-        print("c1 area: ", cv2.contourArea(c1), " c2 area: ", cv2.contourArea(c2))
-        return True
-    '''
+                    #print("diffy: " , diffy, " diffx: ", diffx)
+                    
+                    if(dist < mind):
+                        mind = dist
+                        #print("adjusted distance: ", mind)
+                        #print("x1: ", c1[i][0][0], " x2: ", c2[j][0][0])
+                        #print("y1 ", c1[i][0][1], " y2: ", c2[j][0][1])
+                        #print("diffy: " , diffy, " diffx: ", diffx)
+
+                        if(mind < 40):
+
+                            return True
+                        
+
     return False
     
 
