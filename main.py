@@ -4,10 +4,6 @@ import numpy as np
 import time
 
 
-#  Look into joining contours that are near
-#
-#
-
 def main():
 
     # Makes window for letter a
@@ -30,14 +26,10 @@ def main():
 
 
 
-    
+    imgROI = image[0:70, 0:1]
+    cv2.imshow("c1", imgROI)
+    cv2.waitKey(0)
     print(type(contours))
-    '''
-    print(contours[0])
-    contours[0].sort(axis=2)
-    print(contours[0])
-    print(contours[0][0][0][0],contours[0][0][0][1])
-    '''
     
     n = len(contours)
 
@@ -48,7 +40,13 @@ def main():
     j = 0
 
     
-
+    # Contours is defined as follows ->
+    
+    #print("countours: ", contours)                     # Array of contours (objects) defined by arrays of points
+    #print("contours[0] ", contours[0])                 # First contour (object) defined by it's array of points
+    #print("contours[0][0] ", contours[0][0])           # Array of the points in the first spot of that object
+    #print("contours[0][0][0] ", contours[0][0][0])     # Accessing those first points [x,y]
+    #print("contours[0][0][0][0]", contours[0][0][0][0) # x value of the first point in the contour
     
     start = time.time()
 
@@ -57,27 +55,39 @@ def main():
     # Solves the "i" and "j" problem of the disconnected dots
     while(i < n):
 
+        # start comparison with next in list
+        # don't want to recompare objects or compare same object
+        # **NOTE** -> j will always be ahead of i
         j = i + 1
+        
         while(j < n):
 
             #print("i: ", i, " j: ", j, "length: ", len(contours), "n: ", n)
-            close = distance(contours[i], contours[j])
+
+            # check if they are close enough vertically
+            # close = bool
+            close = close_enough(contours[i], contours[j], image)
+            #print("CLOSE ENOUGH? : ", close)
             #print("min distance: ", close, '\n')
 
-
-            
             if(close):
                 #print("i:" , i, " j: ", j, "close! n: ", n)
 
-
-                # Probably clean up the logic here later
-                # Takes out the two contours and joins them
-                # reinserts joined contour back into the list
+                # join the two contours into one
                 joined = np.concatenate((contours[i],contours[j]))
+
+                # take out the original contour
                 contours.pop(i)
+
+                # Insert our joined contour in the ith position
+                # List is now original size again
                 contours.insert(i,joined)
+
+                # Pop our jth contour as it is now joined
                 contours.pop(j)
 
+                # update bounds
+                # check if i is 0 first
                 n -= 1
                 j -= 1
 
@@ -124,12 +134,30 @@ def main():
     cv2.imshow("rectangle", copy)
 
 
-def distance(c1, c2):
+def close_enough(c1, c2, image):
 
-    mind = 9999999999
+    minimum_distance = 9999999999
 
     n1 = len(c1)
     n2 = len(c2)
+
+    c1x = 99999
+    c1y = 99999
+
+    c2x = 0
+    c2y = 0
+    
+    M1 = cv2.moments(c1)
+    if(int(M1['m00'])):
+        
+        c1x = int(M1['m10']/M1['m00'])
+        c1y = int(M1['m01']/M1['m00'])
+
+    M2 = cv2.moments(c2)
+    if(int(M2['m00'])):
+        c2x = int(M2['m10']/M2['m00'])
+        c2y = int(M2['m01']/M2['m00'])
+    
     leftmost1 = tuple(c1[c1[:,:,0].argmin()][0])
     rightmost1 = tuple(c1[c1[:,:,0].argmax()][0])
     topmost1 = tuple(c1[c1[:,:,1].argmin()][0])
@@ -141,38 +169,48 @@ def distance(c1, c2):
     bottommost2 = tuple(c2[c2[:,:,1].argmax()][0])
 
     
+    x,y,w,h = cv2.boundingRect(c1)
+    imgROI = image[0:70, 0:1]
+    #cv2.imshow("c1", imgROI)
+    #cv2.waitKey(0)
 
-    if((abs(topmost1[1] - bottommost2[1]) < 50) or (abs(bottommost1[1] - topmost2[1]) < 50)):
 
-        if((abs(leftmost1[0] - rightmost2[0]) < 30) or (abs(rightmost1[0] - leftmost2[0]) < 30)):
+    x,y,w,h = cv2.boundingRect(c2)
+    imgROI = image[y:y+h, x:x+w]
+    #cv2.imshow("c2", imgROI)
+    #cv2.waitKey(0)
+    
+    cv2.destroyAllWindows()
+    if((abs((abs(c1x-c2x) - abs(c1y-c2y))) < 150)):
+
+        if(((abs(topmost1[1] - bottommost2[1]) < 70) or (abs(bottommost1[1] - topmost2[1]) < 70))):
                
             for i in range(n1):
 
                 for j in range (n2):
 
-                    #print("c1: ", c1)
-                    #print("c2: ", c2)
-                    diffx = 5*abs(c1[i][0][0] - c2[j][0][0])
-                    diffy = abs(c1[i][0][1] - c2[j][0][1])
-                    dist =  diffy + diffx 
-
-                    #print("diffy: " , diffy, " diffx: ", diffx)
+                    # Add more weight to horizontal distance
+                    # Don't want to join letters that are next to each other
+                    diff_x = 10*abs(c1[i][0][0] - c2[j][0][0])
+                    diff_y = abs(c1[i][0][1] - c2[j][0][1])
                     
-                    if(dist < mind):
-                        mind = dist
-                        #print("adjusted distance: ", mind)
-                        #print("x1: ", c1[i][0][0], " x2: ", c2[j][0][0])
-                        #print("y1 ", c1[i][0][1], " y2: ", c2[j][0][1])
-                        #print("diffy: " , diffy, " diffx: ", diffx)
+                    dist =  diff_x + diff_y 
 
-                        if(mind < 40):
+                    #print("diffy: " , diff_y, " diffx: ", diff_x)
 
+
+                    if(dist < minimum_distance): 
+
+                        minimum_distance = dist
+                        #print("min dist: ", minimum_distance)
+
+                        if(minimum_distance < 60): 
+                            
                             return True
                         
+                     
 
     return False
     
-
-
 if __name__ == "__main__":
     main()
