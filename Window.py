@@ -25,7 +25,7 @@ class Window(Tk):
         # Sizes of window and canvas
         self.width = 700
         self.height = 700
-        self.drawable_width = 605
+        self.drawable_width = 600
         self.drawable_height = 600
 
 
@@ -42,9 +42,13 @@ class Window(Tk):
         
         # Menubar for top of window
         menubar = Menu(self)
-        menubar.add_command(label="Save", command=self.save)
+        menubar.add_command(label = "Save", command=self.save)
+        menubar.add_command(label = "Quit!", command=self.destroy)
+        menubar.add_command(label = "Pen", command=(self.onPen))
+        menubar.add_command(label = "Eraser", command=(self.onEraser))
+        menubar.add_command(label = "Undo (drawing)", command=(self.undo))        
         menubar.add_command(label = "Clear", command=self.clear)
-        menubar.add_command(label="Quit!", command=self.destroy)
+
         self.config(menu=menubar)
 
 
@@ -64,6 +68,19 @@ class Window(Tk):
         self.onClick = False
         self.previous_x = 0
         self.previous_y = 0
+        self.eraser = False
+
+    
+        # Functions as stack to allow for undo of last drawing
+        # Number of clicks is top of stack
+        self.previous_moves = []
+        self.clicks = -1
+
+        # Array of lines that were drawn
+        self.last_move = []
+
+        # Keeps track of if we actually drew a line last click
+        self.drew = False
 
         
     # Take screenshot of drawable area
@@ -78,19 +95,52 @@ class Window(Tk):
         
         ImageGrab.grab((2 + drawable_x0, 2 + drawable_y0,
                             drawable_x1,     drawable_y1)).save(self.filename + ".TIFF")
-       
+
+    def undo(self):
+            
+        if(len(self.previous_moves)):
+            
+            undo = self.previous_moves[self.clicks]
+
+            for obj in undo:
+                
+                self.drawing_area.create_line(obj[0], obj[1],
+                                             obj[2],  obj[3],
+                                             smooth=TRUE,     width = obj[4], fill = obj[5])
+
+    
+            self.previous_moves.pop(self.clicks)
+            self.clicks -= 1
+
+        # end if
+            
     def clear(self):
-        self.drawing_area.delete("all") 
-
+        self.drawing_area.delete("all")
+        self.previous_moves.clear()
+        self.last_move.clear()
+        self.clicks = -1
+        
     def onClick(self, event):
-        self.onClick = True           
+        self.onClick = True
 
+    def onEraser(self):
+        self.eraser = True
+
+    def onPen(self):
+        self.eraser = False
 
     # Resets line when user lets go of the click
     def offClick(self, event):
         self.onClick = False
         self.previous_x = None
         self.previous_y = None
+
+        if(self.drew):
+            
+            # Append to list by value, not by reference
+            self.previous_moves.append(list(self.last_move))
+            self.last_move.clear()
+            self.clicks += 1
 
 
     # Occurs whenever user is hovering over drawable area
@@ -99,11 +149,33 @@ class Window(Tk):
         # Creates a line from the previous position to current position
         # If dragged it appears as a smooth line in the direction they're going
         if self.onClick:
-            if self.previous_x and self.previous_y:               
-                event.widget.create_line(self.previous_x, self.previous_y,
-                                         event.x,         event.y,
-                                         smooth=TRUE,     width = 5, fill = 'white')
+
+            # If our previous position exists
+            if self.previous_x and self.previous_y:
                 
+                if(self.eraser):
+                    event.widget.create_line(self.previous_x, self.previous_y,
+                         event.x,         event.y,
+                         smooth=TRUE,     width = 20, fill = 'black')
+                    self.drew = False
+                    
+                else:
+                    
+                    event.widget.create_line(self.previous_x, self.previous_y,
+                                             event.x,         event.y,
+                                             smooth=TRUE,     width = 5, fill = 'white')
+                    
+                    self.last_move.append([self.previous_x, self.previous_y, event.x, event.y, 5, 'black'])
+                    self.drew = True
+
+
+            # Update our previous postion with our current position
             self.previous_x = event.x
             self.previous_y = event.y
+
+            
+        else:
+            self.drew = False
+                    
+
 
