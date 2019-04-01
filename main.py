@@ -27,8 +27,8 @@ def main():
 
 
     imgROI = image[0:70, 0:1]
-    cv2.imshow("c1", imgROI)
-    cv2.waitKey(0)
+    #cv2.imshow("c1", imgROI)
+    #cv2.waitKey(0)
     print(type(contours))
     
     n = len(contours)
@@ -66,12 +66,14 @@ def main():
 
             # check if they are close enough vertically
             # close = bool
-            close = close_enough(contours[i], contours[j], image)
+            close = close_enough(contours[i], contours[j], copy)
             #print("CLOSE ENOUGH? : ", close)
             #print("min distance: ", close, '\n')
 
             if(close):
                 #print("i:" , i, " j: ", j, "close! n: ", n)
+
+   
 
                 # join the two contours into one
                 joined = np.concatenate((contours[i],contours[j]))
@@ -115,6 +117,7 @@ def main():
                      (255, 0, 0),   # BGR value (RGB backwards)
                       2)            # Thickness       
 
+        
         # Region of interest is our rectangle
         imgROI = image[y:y+h, x:x+w]
 
@@ -124,9 +127,9 @@ def main():
 
         
         print(cv2.contourArea(contours[obj]))
-        cv2.imshow("crop", ROI_resized)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        #cv2.imshow("crop", ROI_resized)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
 
         
   
@@ -136,77 +139,53 @@ def main():
 
 def close_enough(c1, c2, image):
 
-    minimum_distance = 9999999999
-
-    n1 = len(c1)
-    n2 = len(c2)
-
-    c1x = 99999
-    c1y = 99999
-
-    c2x = 0
-    c2y = 0
-    
-    M1 = cv2.moments(c1)
-    if(int(M1['m00'])):
-        
-        c1x = int(M1['m10']/M1['m00'])
-        c1y = int(M1['m01']/M1['m00'])
-
-    M2 = cv2.moments(c2)
-    if(int(M2['m00'])):
-        c2x = int(M2['m10']/M2['m00'])
-        c2y = int(M2['m01']/M2['m00'])
-    
-    leftmost1 = tuple(c1[c1[:,:,0].argmin()][0])
-    rightmost1 = tuple(c1[c1[:,:,0].argmax()][0])
-    topmost1 = tuple(c1[c1[:,:,1].argmin()][0])
-    bottommost1 = tuple(c1[c1[:,:,1].argmax()][0])
-
-    leftmost2 = tuple(c2[c2[:,:,0].argmin()][0])
-    rightmost2 = tuple(c2[c2[:,:,0].argmax()][0])
-    topmost2 = tuple(c2[c2[:,:,1].argmin()][0])
-    bottommost2 = tuple(c2[c2[:,:,1].argmax()][0])
 
     
+    # (x,y) is top left corner of rectangle
+    # (x+w, y+h) is bottom right corner of rectangle
+    #  ^y coordinates increase as you move to bottom of screen
+    #  x coordinates increase as expected
     x,y,w,h = cv2.boundingRect(c1)
-    imgROI = image[0:70, 0:1]
-    #cv2.imshow("c1", imgROI)
-    #cv2.waitKey(0)
+    x2,y2,w2,h2 = cv2.boundingRect(c2)
+
+    # Get key points of our rectangles
+    right1 = x+w
+    right2 = x2+w2
+
+    left1 = x
+    left2 = x2
+
+    top1 = y
+    top2 = y2
+
+    bottom1 = y+h
+    bottom2 = y2+h2
+
+    middle1y = (y + (h/2))
+    middle2y = (y2 + (h2/2))
+    middle1x = (x + (w/2))
+    middle2x = (x2 + (w2/2))
+
+    # If the 2 contours are within 30 pixels of each other
+    if(abs(middle1x - middle2x) < 30 and (abs(right1 - (right2)) < 30 or abs((left1)-left2) < 30)):
 
 
-    x,y,w,h = cv2.boundingRect(c2)
-    imgROI = image[y:y+h, x:x+w]
-    #cv2.imshow("c2", imgROI)
-    #cv2.waitKey(0)
-    
-    cv2.destroyAllWindows()
-    if((abs((abs(c1x-c2x) - abs(c1y-c2y))) < 150)):
-
-        if(((abs(topmost1[1] - bottommost2[1]) < 70) or (abs(bottommost1[1] - topmost2[1]) < 70))):
-               
-            for i in range(n1):
-
-                for j in range (n2):
-
-                    # Add more weight to horizontal distance
-                    # Don't want to join letters that are next to each other
-                    diff_x = 10*abs(c1[i][0][0] - c2[j][0][0])
-                    diff_y = abs(c1[i][0][1] - c2[j][0][1])
-                    
-                    dist =  diff_x + diff_y 
-
-                    #print("diffy: " , diff_y, " diffx: ", diff_x)
+        # if contour 1 is on bottom (i or j), and upperbound is within 65 pixels of the middle of the dot
+        if((top1 > middle2y) and (top1 > bottom2) and ((top1 - middle2y) < 65)):
 
 
-                    if(dist < minimum_distance): 
+            # if the middle of the dot is within 30 pixels of the left and right bound of c1            
+            if(abs(middle2x - right1)< 30):
+                return True
 
-                        minimum_distance = dist
-                        #print("min dist: ", minimum_distance)
 
-                        if(minimum_distance < 60): 
-                            
-                            return True
+        # Same as top, only contour2 is on bottom
+        elif((top2>middle1y) and (top2 > bottom1) and (top2 - middle1y)< 65):
+            if(abs(middle1x - right2) < 30):
+                return True
+            
+        else:
+            return False
                         
                      
 
