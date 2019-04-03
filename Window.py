@@ -160,6 +160,7 @@ class Window(Tk):
                     self.drew = False
                     
                 else:
+
                     
                     event.widget.create_line(self.previous_x, self.previous_y,
                                              event.x,         event.y,
