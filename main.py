@@ -3,18 +3,37 @@ import cv2                  # opencv for reading data from images
 import numpy as np          # use of multidimensional numpy arrays
 import time                 # determine how efficient program is
 import letter_detection     # detecting i's and j's
+from Training_Window import *
 
 
 def main():
 
+
     # Makes window for letter a
-    w = Window("a");
-    w.mainloop();
 
+    t = Training_Window("b")
+    t.mainloop()
+    
+    w = Window()
+    w.mainloop()
+
+    small = Window(w = 200, h = 200,filename = "a", train = True)
+    small.mainloop()
+
+    l = np.load('a.npz')
+
+    #print("LOADED")
+    #print(l['one'])
+    #print(l['two'])
+    #print(l['three'])
+
+
+    '''
     # Reads in our image as a numpy array
-    image = cv2.imread("a.TIFF")
+    image = cv2.imread("user_input.TIFF")
 
 
+    
     # make copy to not modify original image
     copy  = image.copy()
 
@@ -81,20 +100,20 @@ def main():
             Sum += np.nansum(i)
 
     
-        print(type(adjusted))
+        #print(type(adjusted))
 
-        print(adjusted)
-
-
+        #print(adjusted)
 
 
-        print(type(Sum))
 
 
-        print(Sum)
+        #print(type(Sum))
+
+
+       # print(Sum)
         
         
-        cv2.imshow("resized" + str(c), resized)
+        #cv2.imshow("resized" + str(c), resized)
 
 
 
@@ -103,7 +122,7 @@ def main():
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-
+    '''
     
 if __name__ == "__main__":
     main()
