@@ -262,7 +262,7 @@ class Window(Tk):
                 # 30x50 because alot of letters are tall
                 # don't want to stretch them too much
                 resized = cv2.resize(imgROI, (30, 50))
-                binary = resized/resized
+                binary = np.nan_to_num(resized/resized)
                 self.trainingList.append(binary)
             
             
@@ -271,14 +271,14 @@ class Window(Tk):
                 a2 = self.trainingList[1]
                 a3 = self.trainingList[2]
 
-                for i in range(len(self.trainingList)):
-                    print(self.trainingList[i])
                 np.savez("data/" + self.filename, one = a1, two = a2, three = a3)
 
 
                 l = np.load('data/a.npz')
 
 
+                print("LOADED: " , l['one'] ,"\n\n\n\n")
+                print(self.trainingList[0])
                 print(np.array_equal(self.trainingList[0],l['one']))
                 print(np.array_equal(self.trainingList[1],l['two']))
                 print(np.array_equal(self.trainingList[2],l['three']))
