@@ -97,12 +97,7 @@ class Window(Tk):
         ImageGrab.grab((2 + drawable_x0, 2 + drawable_y0,
                             drawable_x1,     drawable_y1)).save(filename+".TIFF")
 
-        
-    def saveq(self):
-        self.save()
-        self.destroy()
 
-        
     def undo(self):
             
         if(len(self.previous_moves)):

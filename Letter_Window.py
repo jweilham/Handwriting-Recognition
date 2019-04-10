@@ -1,4 +1,3 @@
-
 from Window import *
 
 # Ignore error when dividing by 0 in numpy array
@@ -9,16 +8,20 @@ class Letter_Window(Window):
     def __init__(self, filename, iterations = 3):
         Window.__init__(self, w = 350, h = 350, filename = filename)
 
-        self.iterations = iterations
-        
-
-        self.menubar.insert_command(0, label = "Submit Letter", command=self.addData)
 
         # List of data to save 
         self.dataList = []
 
+        # number of times to collect data for letter
+        self.iterations = iterations
+
+
+        # Update menubar
+        self.menubar.insert_command(0, label = "Submit Letter " + str(self.filename), command=self.addData)
         self.config(menu=self.menubar)
-        self.drawing_area.config(width=200, height=200)
+
+        
+        self.drawing_area.config(width=200, height=200)     
 
 
     # Adds data to our save file for a specific letter
@@ -30,7 +33,7 @@ class Letter_Window(Window):
 
             
             # Reads in our image as a numpy array
-            image = cv2.imread(tmpfile)
+            image = cv2.imread(tmpfile+".TIFF")
             
             # make copy to not modify original image
             copy  = image.copy()
