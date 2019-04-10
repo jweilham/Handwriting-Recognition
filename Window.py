@@ -262,32 +262,65 @@ class Window(Tk):
                 # 30x50 because alot of letters are tall
                 # don't want to stretch them too much
                 resized = cv2.resize(imgROI, (30, 50))
-                binary = np.nan_to_num(resized/resized)
-                self.trainingList.append(binary)
+
+                # Convert values to only (255,255,255) and (0,0,0)
+                ones_and_nan = (resized/resized)
+                binary = np.nan_to_num(ones_and_nan)
+                only_white = np.multiply(255,binary)
+                
+                self.trainingList.append(only_white.astype(np.uint8))
             
             
             if(len(self.trainingList) > 2):
-                a1 = self.trainingList[0]
-                a2 = self.trainingList[1]
-                a3 = self.trainingList[2]
 
-                np.savez("data/" + self.filename, one = a1, two = a2, three = a3)
-
-
-                l = np.load('data/a.npz')
+                directory = "data/" + self.filename + ".npz"
+                print(directory)
+                
+                #np.savez(directory, *self.trainingList)
+                #print(self.trainingList[0])
 
 
-                print("LOADED: " , l['one'] ,"\n\n\n\n")
-                print(self.trainingList[0])
-                print(np.array_equal(self.trainingList[0],l['one']))
-                print(np.array_equal(self.trainingList[1],l['two']))
-                print(np.array_equal(self.trainingList[2],l['three']))
-                print(np.array_equal(self.trainingList[0],l['two']))
-                                        
-                #print("LOADED")
-                #print(l['one'])
-                #print(l['two'])
-                #print(l['three'])
+                
+                loaded = []
+                
+                try:
+                    loaded = np.load(directory)
+                
+                except Exception as e:
+                    np.savez(directory, *self.trainingList)
+                    print(str(e))
+                    print("Created new file -> ", directory)
+                    self.destroy()
+                    return
+
+                
+
+                loaded = np.load(directory)
+                print("LOADED: " , loaded ,"\n\n\n\n")
+                print(type(loaded))
+
+                l = []
+                for key in loaded:
+                    print(key)
+                    l.append((loaded[key]))
+
+
+                for i in self.trainingList:
+                    l.append(i)
+
+
+                print(len(l))
+
+                for j in l:
+         
+                    cv2.imshow("LOADED", j)
+                    cv2.waitKey(0)
+
+                np.savez(directory, *l)               
+                    
+
+                
+
                 self.destroy()
                 return
         

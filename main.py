@@ -6,6 +6,7 @@ import letter_detection     # detecting i's and j's
 from Training_Window import *
 
 
+
 def main():
 
 
@@ -20,7 +21,7 @@ def main():
     small = Window(w = 200, h = 200,filename = "a", train = True)
     small.mainloop()
 
-    l = np.load('a.npz')
+    #l = np.load('a.npz')
 
     #print("LOADED")
     #print(l['one'])
@@ -56,72 +57,6 @@ def main():
     #print("contours[0][0] ", contours[0][0])           # Array of the points in the first spot of that object
     #print("contours[0][0][0] ", contours[0][0][0])     # Accessing those first points [x,y]
     #print("contours[0][0][0][0]", contours[0][0][0][0) # x value of the first point in the contour
-
-    
-    start = time.time()
-
-    letter_detection.combine_i_j(contours)
-    
-    
-    print("--- %s seconds ---" % (time.time() - start))
-    
-    for c,obj in enumerate(contours):
-
-        x,y,w,h = cv2.boundingRect(contours[c])
-
- 
-        cv2.rectangle(copy,         # Draw rectangle on temporary copy
-                     (x, y),        # Start
-                     (x+w,y+h),     # End
-                     (255, 0, 0),   # BGR value (RGB backwards)
-                      2)            # Thickness       
-
-        
-        # Region of interest is our rectangle
-        # Apparently our imgROI isn't read in as 0's and 255's
-        # Even if we save as a .TIFF
-        imgROI = image[y:y+h, x:x+w]
-
-    
-        # resize image to 30x50 to make a uniform size
-        # 30x50 because alot of letters are tall
-        # don't want to stretch them too much
-        resized = cv2.resize(imgROI, (30, 50))
-
-
-
-        # Divide array by itself in order turn it into 0's and 1's
-        # 1's being the white space, and 0's being the black space
-        # numpy adds in "nan" for 0/0 division for not a number (can be ignored)
-        adjusted = resized/resized
-
-        Sum = 0
-        for i in adjusted:
-            Sum += np.nansum(i)
-
-    
-        #print(type(adjusted))
-
-        #print(adjusted)
-
-
-
-
-        #print(type(Sum))
-
-
-       # print(Sum)
-        
-        
-        #cv2.imshow("resized" + str(c), resized)
-
-
-
-            
-    cv2.imshow("rectangle", copy)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
     '''
     
 if __name__ == "__main__":
