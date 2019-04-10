@@ -3,7 +3,7 @@ import cv2                  # opencv for reading data from images
 import numpy as np          # use of multidimensional numpy arrays
 import time                 # determine how efficient program is
 import letter_detection     # detecting i's and j's
-from Training_Window import *
+from Letter_Window import *
 
 
 
@@ -12,13 +12,14 @@ def main():
 
     # Makes window for letter a
 
-    t = Training_Window("b")
+    t = Letter_Window("b")
     t.mainloop()
     
     w = Window()
     w.mainloop()
 
-    small = Window(w = 200, h = 200,filename = "a", train = True)
+    small = Window(filename = "a")
+
     small.mainloop()
 
     #l = np.load('a.npz')
