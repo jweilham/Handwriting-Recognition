@@ -42,7 +42,7 @@ def main():
     start = time.time()
 
     letter_detection.combine_i_j(contours)
-    
+    letter_detection.disjoined_letters(contours)
     
     print("--- %s seconds ---" % (time.time() - start))
     
