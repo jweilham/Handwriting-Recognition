@@ -54,37 +54,102 @@ class Letter_Window(Window):
             if(len(contours) > 1):
                 messagebox.showerror("Error", "Please draw one letter")
                 return
+
             
-            for i in range(len(contours)):
 
-                x,y,w,h = cv2.boundingRect(contours[i])
+            x,y,w,h = cv2.boundingRect(contours[i])
 
-         
-                cv2.rectangle(copy,         # Draw rectangle on temporary copy
-                             (x, y),        # Start
-                             (x+w,y+h),     # End
-                             (255, 0, 0),   # BGR value (RGB backwards)
-                              2)            # Thickness       
+     
+            cv2.rectangle(copy,         # Draw rectangle on temporary copy
+                         (x, y),        # Start
+                         (x+w,y+h),     # End
+                         (255, 0, 0),   # BGR value (RGB backwards)
+                          2)            # Thickness       
 
+            
+            # Region of interest is our rectangle
+            # Apparently our imgROI isn't read in as 0's and 255's
+            # Even if we save as a .TIFF
+            imgROI = image[y:y+h, x:x+w]
+
+        
+            # Resize letter to make them all in a uniform size
+            # Not square because alot of letters are tall
+            # Don't want to stretch them too much
+            resized = cv2.resize(imgROI, (20,40))
+
+            # Convert values to only (255,255,255) and (0,0,0)
+            ones_and_nan = (resized/resized)
+            binary = np.nan_to_num(ones_and_nan)
+            only_white = np.multiply(255,binary)
+            displayable = only_white.astype(np.uint8)
+            
+            self.dataList.append(displayable)
+
+            cv2.imshow("hi", displayable)
+            cv2.waitKey(0)
+
+            feature = []
+            summed = 0
+            m = displayable
+            for i in range(0,40,4):
                 
-                # Region of interest is our rectangle
-                # Apparently our imgROI isn't read in as 0's and 255's
-                # Even if we save as a .TIFF
-                imgROI = image[y:y+h, x:x+w]
+                for j in range(0,20,4):
 
-            
-                # resize image to 30x50 to make a uniform size
-                # 30x50 because alot of letters are tall
-                # don't want to stretch them too much
-                resized = cv2.resize(imgROI, (30, 50))
 
-                # Convert values to only (255,255,255) and (0,0,0)
-                ones_and_nan = (resized/resized)
-                binary = np.nan_to_num(ones_and_nan)
-                only_white = np.multiply(255,binary)
+                    # Top left square
+                    #print(i,j)
+                    #print(i,j+1)
+                    #print(i+1, j)
+                    #print(i+1, j+1)
+                    summed += m[i][j][0]
+                    summed += m[i][j+1][0]
+                    summed += m[i+1][j][0]
+                    summed += m[i+1][j+1][0]
+
+                    # Bottom left square
+                    #print(i+2,j)
+                    #print(i+2,j+1)
+                    #print(i+3, j)
+                    #print(i+3, j+1)
+                    summed += m[i+2][j][0]
+                    summed += m[i+2][j+1][0]
+                    summed += m[i+3][j][0]
+                    summed += m[i+3][j+1][0]
+                    
+                    # Top right square
+                    #print(i,j+2)
+                    #print(i,j+3)
+                    #print(i+1, j+2)
+                    #print(i+1, j+3)
+                    summed += m[i][j+2][0]
+                    summed += m[i][j+3][0]
+                    summed += m[i+1][j+2][0]
+                    summed += m[i+1][j+3][0]
+
+                    
+                    # Bottom right sqaure
+                    #print(i+2,j+2)
+                    #print(i+2,j+3)
+                    #print(i+3, j+2)
+                    #print(i+3, j+3)
+                    summed += m[i+2][j+2][0]
+                    summed += m[i+2][j+3][0]
+                    summed += m[i+3][j+2][0]
+                    summed += m[i+3][j+3][0]
+
+                    feature.append(summed)
+                    summed = 0
+                    print("endSqaure\n")
+
+                    
+
+
+    
+            print(np.sum(displayable))
+            print(np.sum(feature)*3)
+            print(feature)
                 
-                self.dataList.append(only_white.astype(np.uint8))
-            
             
             if(len(self.dataList) >= self.iterations):
 
