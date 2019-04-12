@@ -58,7 +58,7 @@ class Letter_Window(Window):
                 return
 
             
-            print(contours[0])
+            
             x,y,w,h = cv2.boundingRect(contours[0])
 
      
@@ -128,7 +128,7 @@ class Letter_Window(Window):
 
                     feature.append(summed)
                     summed = 0
-                    print("endSqaure\n")
+                    
 
 
             self.features.append(feature)
