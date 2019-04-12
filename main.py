@@ -17,12 +17,13 @@ def main():
     name = None
     
     #print(type(name))
-            
-    t = Letter_Window("b")
-    t.mainloop()
+    
+    b = Letter_Window("b")
+    b.mainloop()
 
-    u = User_Window()
-    u.mainloop()
+    a = Letter_Window("a")
+    a.mainloop()
+
 
     b = np.load("./data/features/b.npz")
 
