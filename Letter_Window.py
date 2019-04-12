@@ -1,4 +1,5 @@
 from Window import *
+import os, os.path
 
 # Ignore error when dividing by 0 in numpy array
 np.seterr(divide='ignore', invalid='ignore')
@@ -11,6 +12,7 @@ class Letter_Window(Window):
 
         # List of data to save 
         self.dataList = []
+        self.features = []
 
         # number of times to collect data for letter
         self.iterations = iterations
@@ -56,8 +58,8 @@ class Letter_Window(Window):
                 return
 
             
-
-            x,y,w,h = cv2.boundingRect(contours[i])
+            print(contours[0])
+            x,y,w,h = cv2.boundingRect(contours[0])
 
      
             cv2.rectangle(copy,         # Draw rectangle on temporary copy
@@ -91,6 +93,8 @@ class Letter_Window(Window):
 
             feature = []
             summed = 0
+
+            
             m = displayable
             for i in range(0,40,4):
                 
@@ -98,30 +102,18 @@ class Letter_Window(Window):
 
 
                     # Top left square
-                    #print(i,j)
-                    #print(i,j+1)
-                    #print(i+1, j)
-                    #print(i+1, j+1)
                     summed += m[i][j][0]
                     summed += m[i][j+1][0]
                     summed += m[i+1][j][0]
                     summed += m[i+1][j+1][0]
 
                     # Bottom left square
-                    #print(i+2,j)
-                    #print(i+2,j+1)
-                    #print(i+3, j)
-                    #print(i+3, j+1)
                     summed += m[i+2][j][0]
                     summed += m[i+2][j+1][0]
                     summed += m[i+3][j][0]
                     summed += m[i+3][j+1][0]
                     
                     # Top right square
-                    #print(i,j+2)
-                    #print(i,j+3)
-                    #print(i+1, j+2)
-                    #print(i+1, j+3)
                     summed += m[i][j+2][0]
                     summed += m[i][j+3][0]
                     summed += m[i+1][j+2][0]
@@ -129,10 +121,6 @@ class Letter_Window(Window):
 
                     
                     # Bottom right sqaure
-                    #print(i+2,j+2)
-                    #print(i+2,j+3)
-                    #print(i+3, j+2)
-                    #print(i+3, j+3)
                     summed += m[i+2][j+2][0]
                     summed += m[i+2][j+3][0]
                     summed += m[i+3][j+2][0]
@@ -142,48 +130,58 @@ class Letter_Window(Window):
                     summed = 0
                     print("endSqaure\n")
 
-                    
 
-
-    
-            print(np.sum(displayable))
-            print(np.sum(feature)*3)
-            print(feature)
-                
+            self.features.append(feature)
             
             if(len(self.dataList) >= self.iterations):
 
-                directory = "data/" + self.filename + ".npz"
+                img_dir = "data/images/" + self.filename + ".npz"
+                feature_dir = "data/features/" + self.filename + ".npz"
                 
-                loaded = []
+                loaded_images = []
+                loaded_features = []
                 
                 try:
-                    loaded = np.load(directory)
+                    
+                    img_data = np.load(img_dir)
+                    feature_data = np.load(feature_dir)
                 
                 except Exception as e:
-                    np.savez(directory, *self.dataList)
+                    np.savez(img_dir, *self.dataList)
+                    np.savez(feature_dir, *self.features)
                     print(str(e))
-                    print("Created new file -> ", directory)
+                    print("Created new file -> ", img_dir)
+                    print("Created new file -> ", feature_dir)
                     self.destroy()
                     return
 
                 
-                # Load in numpy array file
-                loaded = np.load(directory)
-                data = []
+                
+                old_imgs = []
+                old_features = []
 
                 # Move into a usable array
-                for key in loaded:
-                    data.append((loaded[key]))
+                for key in img_data:
+                    old_imgs.append((img_data[key]))
 
+                    
+                for key in feature_data:
+                    old_features.append((feature_data[key]))
 
                 # Add new data to array
-                for letter in self.dataList:
-                    data.append(letter)
+                for new_img in self.dataList:
+                    old_imgs.append(new_img)
+
+                    
+                # Add new data to array
+                for new_feature in self.features:
+                    old_features.append(new_feature)
+
 
 
                 # Save new data
-                np.savez(directory, *data)               
+                np.savez(img_dir, *old_imgs)
+                np.savez(feature_dir, *old_features)
                 
                 self.destroy()
                 return

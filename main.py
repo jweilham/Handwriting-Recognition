@@ -5,46 +5,18 @@ import time                 # determine how efficient program is
 import letter_detection     # detecting i's and j's
 from Letter_Window import *
 from User_Window import *
-from string import ascii_uppercase
+from string import ascii_lowercase
 
 def main():
 
 
-    #get_alphabet()
+    get_alphabet()
 
     
-    for i in range(0,40,4):
-        print(i)
-        for j in range(0,20,4):
-            # Top left square
-            print(i,j)
-            print(i,j+1)
-            print(i+1, j)
-            print(i+1, j+1)
 
-            # Bottom left square
-            print(i+2,j)
-            print(i+2,j+1)
-            print(i+3, j)
-            print(i+3, j+1)
-
-            # Top right square
-            print(i,j+2)
-            print(i,j+3)
-            print(i+1, j+2)
-            print(i+1, j+3)
-
-            # Bottom right sqaure
-            print(i+2,j+2)
-            print(i+2,j+3)
-            print(i+3, j+2)
-            print(i+3, j+3)
-            print("endSqaure\n")
-
-
-        
-
+    name = None
     
+    #print(type(name))
             
     t = Letter_Window("b")
     t.mainloop()
@@ -52,14 +24,22 @@ def main():
     u = User_Window()
     u.mainloop()
 
+    b = np.load("./data/features/b.npz")
+
+    bs = []
+    for key in b:
+        bs.append(b[key])
+
+    print(len(bs))
 
     
 
 def get_alphabet():
 
-    for i in ascii_uppercase:
-        data = Letter_Window(i)
-        data.mainloop()
+    for i in ascii_lowercase:
+        print(i)
+        #data = Letter_Window(i)
+        #data.mainloop()
         
 if __name__ == "__main__":
     main()
