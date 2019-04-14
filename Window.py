@@ -41,6 +41,8 @@ class Window(Tk):
         self.menubar.add_command(label = "Undo (drawing)", command=(self.undo))        
         self.menubar.add_command(label = "Clear", command=self.clear)
         self.config(menu=self.menubar)
+
+        self.bind("<Return>")
         
         # Where to save the image (as a .TIFF)
         self.filename = str(filename)
