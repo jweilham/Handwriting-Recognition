@@ -10,6 +10,7 @@ class Letter_Window(Window):
         Window.__init__(self, w = 350, h = 350, filename = filename)
 
 
+        self.bind("<Return>", lambda e:self.addData())
         # List of data to save 
         self.dataList = []
         self.features = []
@@ -88,7 +89,7 @@ class Letter_Window(Window):
             
             self.dataList.append(displayable)
 
-            cv2.imshow("hi", displayable)
+            #cv2.imshow("hi", displayable)
             cv2.waitKey(0)
 
             feature = []
