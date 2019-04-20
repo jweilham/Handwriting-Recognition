@@ -12,26 +12,8 @@ def main():
 
     get_alphabet()
 
-    
-
-    name = None
-    
-    #print(type(name))
-    
-    b = Letter_Window("b")
-    b.mainloop()
-
-    a = Letter_Window("a")
-    a.mainloop()
-
-
-    b = np.load("./data/features/b.npz")
-
-    bs = []
-    for key in b:
-        bs.append(b[key])
-
-    print(len(bs))
+    y = Letter_Window("y", 18)
+    y.mainloop()
 
     
 
