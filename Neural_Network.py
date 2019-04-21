@@ -1,13 +1,178 @@
 import numpy as np  
 import matplotlib.pyplot as plt
 from string import ascii_lowercase
-np.random.seed(420)
+
 np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
+
+class Neural_Network():
+    
+    def __init__(self):
+        # seeding for random number generation
+        np.random.seed(420)
+
+        self.wh = None
+        self.bh = None
+        
+        self.wo = None
+        self.bo = None
+        self.loaded = False
+        
+        self.outputs = ascii_lowercase
+        
+        
+    def one_hot(self, labels):
+
+        one_hot_labels = np.zeros((len(labels), 26))
+        
+        for i in range(len(labels)):  
+            one_hot_labels[i, labels[i]] = 1
+            print(one_hot_labels[i])
+
+    
+        return one_hot_labels
 
 
         
+    def load(self):
+	
+        try:
+                h = np.load("./wh.npz")
+                hb = np.load("./bh.npz")
+                o = np.load("./wo.npz")
+                ob = np.load("./bo.npz")
+                self.loaded = True
+                
+                one = "one"
+                self.wh = h[one]
+                self.bh = hb[one]
+                self.wo = o[one]
+                self.bo = ob[one]
+                
+                
+
+        except Exception as e:
+                print(str(e))
+                
+
+    def sigmoid(self, x):  
+        return 1/(1+np.exp(-x))
+
+    def sigmoid_der(self, x):  
+        return self.sigmoid(x) *(1-self.sigmoid (x))
+
+    def softmax(self, A, axel = 1):  
+        expA = np.exp(A)
+        return expA / expA.sum(axis=axel, keepdims=True)
+
+
+    def train(self, feature_array, labels, iterations):
+
+        feature_set = np.vstack(feature_array)
+
+        # How many features do we have
+        instances = feature_set.shape[0]
+
+        # Size of each feature (dimensionss)
+        attributes = feature_set.shape[1]
+
+        print("instances", instances)
+        print("attributes", attributes)
+        
+        one_hot_labels = self.one_hot(labels)
+
+
+        hidden_nodes = 50  
+        output_labels = 26
+
+
+        # Weights to hidden nodes/Bias of nodes
+        self.wh = np.random.rand(attributes,hidden_nodes)
+        self.bh = np.random.randn(hidden_nodes)
+
+        # Weights to the output nodes/Bias of nodes
+        self.wo = np.random.rand(hidden_nodes,output_labels)
+        self.bo = np.random.randn(output_labels)
+
+        
+        # Learning rate
+        lr = 0.005
+
+        error_cost = []
+
+        for epoch in range(10000):  
+        ############# feedforward
+
+            # Phase 1
+            zh = np.dot(feature_set, self.wh) + self.bh
+            ah = self.sigmoid(zh)
+
+            # Phase 2
+            zo = np.dot(ah, self.wo) + self.bo
+            ao = self.softmax(zo)
+
+
+
+        ########## Back Propagation
+
+        ########## Phase 1
+
+            dcost_dzo = ao - one_hot_labels
+            dzo_dwo = ah
+
+            dcost_wo = np.dot(dzo_dwo.T, dcost_dzo)
+
+            dcost_bo = dcost_dzo
+
+        ########## Phases 2
+
+            dzo_dah = self.wo
+            dcost_dah = np.dot(dcost_dzo , dzo_dah.T)
+            dah_dzh = self.sigmoid_der(zh)
+            dzh_dwh = feature_set
+            dcost_wh = np.dot(dzh_dwh.T, dah_dzh * dcost_dah)
+
+            dcost_bh = dcost_dah * dah_dzh
+
+            # Update Weights ================
+
+            self.wh -= lr * dcost_wh
+            self.bh -= lr * dcost_bh.sum(axis=0)
+
+            self.wo -= lr * dcost_wo
+            self.bo -= lr * dcost_bo.sum(axis=0)
+
+            if epoch % 200 == 0:
+                loss = np.sum(-one_hot_labels * np.log(ao))
+                #print('Loss function value: ', loss)
+                error_cost.append(loss)
+                print("loss: " , loss)
+
+				
+    # returns output number it thinks it is		
+    def think(self, feature):
+        # Phase 1
+        zh = np.dot(feature, self.wh) + self.bh
+        ah = self.sigmoid(zh)
+
+        # Phase 2
+        zo = np.dot(ah, self.wo) + self.bo
+        ao = self.softmax(zo,0)
+
+        print(ao)
+        return np.argmax(ao)
+
+
+    def print(self, feature):
+    
+        prediction = self.outputs[self.think(feature)]
+        print("I think it's an: ", prediction)
+
+
+
+
 data = []
 test_data = []
+
 
 def loader(letter):
     l = []
@@ -41,6 +206,8 @@ for i in range(len(labels)):
         let += 1
 
 
+print(labels)
+
 plz = []
 ans = []
 
@@ -57,169 +224,15 @@ training_outputs = np.array(labels)
 inputs = np.array(plz)
 
 
-training_outputs = np.array(labels)
+n = Neural_Network()
 
-feature_set = np.vstack(np.divide(inputs,4080))
+n.train(inputs, training_outputs, 50000)
+
+n.print(test_data[0])
 
 
 one_hot_labels = np.zeros((len(labels), 26))
 
-
-
-for i in range(len(labels)):  
-    one_hot_labels[i, labels[i]] = 1
-
-
-
-
-loaded = False
-
-try:
-    h = np.load("./wh.npz")
-    hb = np.load("./bh.npz")
-    o = np.load("./wo.npz")
-    ob = np.load("./bo.npz")
-    loaded = True
-
-except Exception as e:
-    print(str(e))
-
-
-
-
-def sigmoid(x):  
-    return 1/(1+np.exp(-x))
-
-def sigmoid_der(x):  
-    return sigmoid(x) *(1-sigmoid (x))
-
-def softmax(A, axel = 1):  
-    expA = np.exp(A)
-    return expA / expA.sum(axis=axel, keepdims=True)
-
-if(not loaded):
-
-
-    instances = feature_set.shape[0]
-
-    attributes = feature_set.shape[1]
-
-    hidden_nodes = 50  
-    output_labels = 26
-
-
-    # Weights to hidden nodes/Bias of nodes
-    wh = np.random.rand(attributes,hidden_nodes)
-    bh = np.random.randn(hidden_nodes)
-
-    # Weights to the output nodes/Bias of nodes
-    wo = np.random.rand(hidden_nodes,output_labels)
-    bo = np.random.randn(output_labels)
-
-
-
-    # Learning rate
-    lr = 0.005
-
-    error_cost = []
-
-    for epoch in range(100000):  
-    ############# feedforward
-
-        # Phase 1
-        zh = np.dot(feature_set, wh) + bh
-        ah = sigmoid(zh)
-
-        # Phase 2
-        zo = np.dot(ah, wo) + bo
-        ao = softmax(zo)
-
-
-
-    ########## Back Propagation
-
-    ########## Phase 1
-
-        dcost_dzo = ao - one_hot_labels
-        dzo_dwo = ah
-
-        dcost_wo = np.dot(dzo_dwo.T, dcost_dzo)
-
-        dcost_bo = dcost_dzo
-
-    ########## Phases 2
-
-        dzo_dah = wo
-        dcost_dah = np.dot(dcost_dzo , dzo_dah.T)
-        dah_dzh = sigmoid_der(zh)
-        dzh_dwh = feature_set
-        dcost_wh = np.dot(dzh_dwh.T, dah_dzh * dcost_dah)
-
-        dcost_bh = dcost_dah * dah_dzh
-
-        # Update Weights ================
-
-        wh -= lr * dcost_wh
-        bh -= lr * dcost_bh.sum(axis=0)
-
-        wo -= lr * dcost_wo
-        bo -= lr * dcost_bo.sum(axis=0)
-
-        if epoch % 200 == 0:
-            loss = np.sum(-one_hot_labels * np.log(ao))
-            #print('Loss function value: ', loss)
-            error_cost.append(loss)
-            print("loss: " , loss)
-
-
-else:
-
-    one = "one"
-    wh = h[one]
-    bh = hb[one]
-    wo = o[one]
-    bo = ob[one]
-    
-
-
-def think(feature):
-    # Phase 1
-    zh = np.dot(feature, wh) + bh
-    ah = sigmoid(zh)
-
-    # Phase 2
-    zo = np.dot(ah, wo) + bo
-    ao = softmax(zo,0)
-
-    print(ao)
-    return np.argmax(ao)
-
-
-
-np.savez("./wh.npz", one = wh)
-np.savez("./bh.npz", one = bh)
-np.savez("./wo.npz", one = wo)
-np.savez("./bo.npz", one = bo)
-
-
-
-correct = 0
-i = 0
-
-
-for letter in ascii_lowercase:
-
-    prediction = ascii_lowercase[think(np.divide(test_data[i],4080))]
-    print("(" + letter + ") ", "I think it's an: ", prediction)
-
-    if(prediction == letter):
-        correct += 1
-
-    i+=1
-
-
-print("I got ", correct, " letters right out of 26")
-print(correct, '/', 26, '=', correct/26)
 
 
 

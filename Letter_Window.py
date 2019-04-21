@@ -138,8 +138,9 @@ class Letter_Window(Window):
                     summed = 0
                     
 
-
-            self.features.append(feature)
+            zero_and_one = np.divide(feature,4080)
+            print(zero_and_one)
+            self.features.append(np.divide(feature,4080))
             
             if(len(self.dataList) >= self.iterations):
 
