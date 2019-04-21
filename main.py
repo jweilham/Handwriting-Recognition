@@ -7,12 +7,25 @@ from Letter_Window import *
 from User_Window import *
 from string import ascii_lowercase
 
+
+def alphabet():
+
+    for i in ascii_lowercase:
+        data = []
+        load = np.load("./data/features/" + i + ".npz")
+
+        j = 0
+        for key in load:
+            data.append(load[key])
+            print(i, data[j])
+            j+=1
+
+    
 def main():
 
+    alphabet()
 
-    get_alphabet()
-
-    y = Letter_Window("y", 18)
+    y = User_Window()
     y.mainloop()
 
 
@@ -23,3 +36,5 @@ def main():
         
 if __name__ == "__main__":
     main()
+
+

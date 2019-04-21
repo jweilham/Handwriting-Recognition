@@ -9,6 +9,7 @@ class User_Window(Window):
         
 	# Update menubar
         self.menubar.insert_command(0, label = "Save & Quit", command=self.saveq)
+        self.menubar.insert_command(0, label = "Use last input", command=self.last)
         self.config(menu=self.menubar)
 
 
@@ -16,8 +17,14 @@ class User_Window(Window):
     def saveq(self):
         
         self.save("user_input/" + self.filename)
+        self.display()
 
+
+    def last(self):
         
+        self.display()
+
+    def display(self):
         # Reads in our image as a numpy array
         image = cv2.imread("user_input/" + self.filename + ".TIFF")
         
@@ -27,22 +34,16 @@ class User_Window(Window):
         #converts to grayscale for contour functions to work
         grayscale = cv2.cvtColor(copy, cv2.COLOR_BGR2GRAY)
 
-
         # Reads in contours (outlines) of objects in image
         contours, hierarchy = cv2.findContours(grayscale,      
                                                cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_SIMPLE)    
+                                               cv2.CHAIN_APPROX_NONE  )    
 
-
-        letter_detection.combine_i_j(contours)
+        letter_detection.combine_i_j(contours, copy)
         
-
         for i in range(len(contours)):
-
-        
             
             x,y,w,h = cv2.boundingRect(contours[i])
-
      
             cv2.rectangle(copy,         # Draw rectangle on temporary copy
                          (x, y),        # Start
@@ -50,16 +51,7 @@ class User_Window(Window):
                          (255, 0, 0),   # BGR value (RGB backwards)
                           2)            # Thickness       
 
-            
-            # Region of interest is our rectangle
-            # Apparently our imgROI isn't read in as 0's and 255's
-            # Even if we save as a .TIFF
 
-            imgROI = image[y:y+h, x:x+w]
-
-
-
-
+        self.destroy()
         cv2.imshow("user_input", copy)
         cv2.waitKey(0)
-        self.destroy()

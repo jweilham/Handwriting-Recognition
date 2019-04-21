@@ -6,7 +6,67 @@ import cv2
 import numpy as np
 
 
-def combine_i_j(contours):
+def combine_i_j(contours, img):
+
+    iterate(contours, overlapping, img)
+    iterate(contours, close_enough, img)
+    iterate(contours, vertically_close, img)
+
+
+
+def disjoined_letters(contours, img):
+
+    iterate(contours, close_enough)
+
+
+
+def overlapping(c1, c2, img):
+    
+    x,y,w,h = cv2.boundingRect(c1)
+    x2,y2,w2,h2 = cv2.boundingRect(c2)
+
+    #If one rectangle is on left side of other 
+    if (x > x2+w2 or x2 > x+w):
+        return False 
+  
+    # If one rectangle is above other 
+    if (y > y2+h2 or y2 > y+h): 
+        return False
+
+    
+    # Area of 1st Rectangle 
+    a1 = w*h
+    # Area of 2nd Rectangle 
+    a2 = w2*h2
+
+    print("a1 : ", a1)
+    print("a20 : ", a2)
+    
+    aI = (min(x+w, x2+w2) - max(x, x2)) *(min(y+h, y2+h2) - max(y, y2)); 
+
+    print("intersecting", aI)
+    total = (a1 + a2 - aI);
+
+    if(a1 < a2):
+        mini = a1
+    else:
+        mini = a2
+
+    
+    print("percentage: ", aI/mini)
+    if((aI/mini) > 0.20):
+        return True
+
+    return False
+
+
+
+##
+# Operation defines what the iteration is doing
+# operation (0) => combine disjoined letters
+# operation (1) => combine i's and j's
+#
+def iterate(contours, function, img):
     i = 0
     j = 0
     n = len(contours)
@@ -14,48 +74,65 @@ def combine_i_j(contours):
 
     # Joins contours if they are close enough vertically
     # Solves the "i" and "j" problem of the disconnected dots
-    while(i < n):
+    while(i < len(contours)):
 
         # start comparison with next in list
         # don't want to recompare objects or compare same object
         # **NOTE** -> j will always be ahead of i
         j = i + 1
         
-        while(j < n):
+        while(j < len(contours)):
 
             # check if they are close enough vertically
-            if(vertically_close(contours[i], contours[j])):
+            copy = img.copy()
+
+            '''
+            print("i: ", i)
+            print("j: ", j)
+            print("contours: ", len(contours))
+            x,y,w,h = cv2.boundingRect(contours[i])
+            x2,y2,w2,h2 = cv2.boundingRect(contours[j])
+            
+            cv2.rectangle(copy,         # Draw rectangle on temporary copy
+                         (x, y),        # Start
+                         (x+w,y+h),     # End
+                         (255, 0, 0),   # BGR value (RGB backwards)
+                          2)            # Thickness 
+            cv2.rectangle(copy,         # Draw rectangle on temporary copy
+                         (x2, y2),        # Start
+                         (x2+w2,y2+h2),     # End
+                         (0, 0, 255),   # BGR value (RGB backwards)
+                          2)            # Thickness
+
+            cv2.imshow("dude", copy)
+            cv2.waitKey(0)
+            '''
+            if(function(contours[i], contours[j], img)):
 
                 # join the two contours into one
                 joined = np.concatenate((contours[i],contours[j]))
-
-                # take out the original contour
-                contours.pop(i)
-
+                
                 # Insert our joined contour in the ith position
                 # List is now original size again
-                contours.insert(i,joined)
-
+                contours.append(joined)
+                
                 # Pop our jth contour as it is now joined
                 contours.pop(j)
+                contours.pop(i)
 
-                # update bounds
-                # check if i is 0 first
-                n -= 1
-                j -= 1
-
-                if(i):
-                    i -= 1
+                i = -1
+                j = n
 
             j += 1
             
         i += 1
-    
 
+    print("end iterate")
+    
 
 # Essentially detects if two contours are meant to be an i or j
 # Returns bool depending on if they're close enough to be considered an i or j
-def vertically_close(c1, c2):
+def vertically_close(c1, c2,img):
 
 
     
@@ -96,11 +173,15 @@ def vertically_close(c1, c2):
             if(abs(middle2x - right1)< 30):
                 return True
 
+            return True
+
 
         # Same as top, only contour2 is on bottom
         elif((top2>middle1y) and (top2 > bottom1) and (top2 - middle1y)< 65):
             if(abs(middle1x - right2) < 30):
                 return True
+
+            return True
             
         else:
             return False
@@ -110,59 +191,12 @@ def vertically_close(c1, c2):
     return False
 
 
-def disjoined_letters(contours):
-    i = 0
-    j = 0
-    n = len(contours)
-    
-
-    # Joins contours if they are close enough vertically
-    # Solves the "i" and "j" problem of the disconnected dots
-    while(i < n):
-
-        # start comparison with next in list
-        # don't want to recompare objects or compare same object
-        # **NOTE** -> j will always be ahead of i
-        j = i + 1
-        
-        while(j < n):
-
-            # check if they are close enough vertically
-            if(close_enough(contours[i], contours[j])):
-
-                # join the two contours into one
-                joined = np.concatenate((contours[i],contours[j]))
-
-                # take out the original contour
-                contours.pop(i)
-
-                # Insert our joined contour in the ith position
-                # List is now original size again
-                contours.insert(i,joined)
-
-                # Pop our jth contour as it is now joined
-                contours.pop(j)
-
-                # update bounds
-                # check if i is 0 first
-                n -= 1
-                j -= 1
-
-                if(i):
-                    i -= 1
-
-            j += 1
-            
-        i += 1
-    
-
 
 # Essentially detects if two contours are meant to be an i or j
 # Returns bool depending on if they're close enough to be considered an i or j
-def close_enough(c1, c2):
+def close_enough(c1, c2, img):
 
 
-    
     # (x,y) is top left corner of rectangle
     # (x+w, y+h) is bottom right corner of rectangle
     #  ^y coordinates increase as you move to bottom of screen
@@ -188,34 +222,43 @@ def close_enough(c1, c2):
     middle1x = (x + (w/2))
     middle2x = (x2 + (w2/2))
 
-    mind = 9999999
+    #print("x ", abs(middle1x - middle2x))
+    #print("y ", abs(middle1y - middle2y))
+    if(abs(middle1x-middle2x) < 30 or abs(right1-left2) < 30 or abs(right2-left1) < 30):
+        #print("horizontal")
 
-    # If the 2 contours are within 30 pixels of each other horizontally
-    if(abs(middle1x - middle2x) < 30 or (abs(right1 - (left2)) < 30 or abs((right2)-left1) < 30)):
+        if(abs(middle1y - middle2y) < 90):
+            #print("vertical")
 
-        print("horizontal")
-        if(abs(middle1y - middle2y) < 90) or (abs(top1 - top2)<50 or abs(bottom1 - bottom2) < 50 or (abs(top1-bottom2) < 50) or abs(top2 - bottom1) < 50):
+
+            a1 = cv2.contourArea(c1)
+            a2 = cv2.contourArea(c2)
+
+            if(a2 < a1):
+                #swap
+                temp = c1
+                c1 = c2
+                c2 = temp
     
-
-            print("vertical")
+            mini = 99999
             for i in range(len(c1)):
-
                 for j in range(len(c2)):
 
-                    #print("c1: ", c1)
-                    #print("c2: ", c2)
-                    diffx = abs(c1[i][0][0] - c2[j][0][0])
-                    diffy = abs(c1[i][0][1] - c2[j][0][1])
-                    dist =  diffy + diffx 
 
-                    #print("diffy: " , diffy, " diffx: ", diffx)
-                    
-                    if(dist < mind):
-                        mind = dist
-                        print(mind)
+                    dist = np.linalg.norm(c2[j]-c1[i])
+                    if(dist < mini):
+                        #print(c2[j])
+                        #print(c1[i])
+                        mini = dist
                         
-                        if(mind < 8):
-                            return True
-           
+                    if abs(dist) < 10.5:
+                        
+                                   
+                        print(dist)
+                    
+                        print("True")
+                        return True
+                        
 
+    print("False")
     return False
