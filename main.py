@@ -15,9 +15,6 @@ def main():
     y = Letter_Window("y", 18)
     y.mainloop()
 
-    
-
-def get_alphabet():
 
     for i in ascii_lowercase:
         print(i)
