@@ -1,5 +1,5 @@
 from Window import *
-
+import time
 
 class User_Window(Window):
 
@@ -34,12 +34,46 @@ class User_Window(Window):
         #converts to grayscale for contour functions to work
         grayscale = cv2.cvtColor(copy, cv2.COLOR_BGR2GRAY)
 
+        # dilate (expand) contours by 2 pixels
+        kernel = np.ones((2,2),np.uint8)
+        dilation = cv2.dilate(grayscale,kernel,iterations = 1)
+
+        # Join contours that are close enough by a 9x30 rectangle
+        rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 30))
+        dilated = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, rect_kernel)
+
+        cv2.imshow("dialated", dilated)
+        cv2.waitKey(0)
+    
+        
+        contours, hierarchy = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        
+        for c in contours:
+            hull = cv2.convexHull(c)
+            print(type(hull))
+            print(type([hull]))
+            cv2.drawContours(copy, [hull], -1, (0, 0, 255), 1)
+
+
+
+        
+        cv2.imshow('convex hull', copy)
+        cv2.waitKey(0)
+
+        
+
         # Reads in contours (outlines) of objects in image
         contours, hierarchy = cv2.findContours(grayscale,      
                                                cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_NONE  )    
+                                               cv2.CHAIN_APPROX_NONE  )
 
-        letter_detection.combine_i_j(contours, copy)
+
+        
+
+        start = time.time()
+        
+        letter_detection.beautify(contours, copy)
+        print("--- %s seconds ---" % (time.time() - start))
         
         for i in range(len(contours)):
             

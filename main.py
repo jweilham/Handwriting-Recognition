@@ -23,9 +23,9 @@ def alphabet():
     
 def main():
 
-    alphabet()
+    #alphabet()
 
-    y = User_Window()
+    y = Letter_Window("y", 50)
     y.mainloop()
 
 
