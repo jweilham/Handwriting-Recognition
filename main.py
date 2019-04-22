@@ -20,12 +20,12 @@ def alphabet():
             print(i, data[j])
             j+=1
 
-    
+
 def main():
 
     #alphabet()
 
-    y = Letter_Window("y", 50)
+    y = User_Window()
     y.mainloop()
 
 

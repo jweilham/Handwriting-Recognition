@@ -1,5 +1,6 @@
 from Window import *
 import time
+from Neural_Network import*
 
 class User_Window(Window):
 
@@ -11,8 +12,9 @@ class User_Window(Window):
         self.menubar.insert_command(0, label = "Save & Quit", command=self.saveq)
         self.menubar.insert_command(0, label = "Use last input", command=self.last)
         self.config(menu=self.menubar)
-
-
+        
+        self.net = Neural_Network()
+        self.net.load()
 
     def saveq(self):
         
@@ -62,18 +64,21 @@ class User_Window(Window):
 
         
 
-        # Reads in contours (outlines) of objects in image
-        contours, hierarchy = cv2.findContours(grayscale,      
-                                               cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_NONE  )
-
-
-        
-
         start = time.time()
         
         letter_detection.beautify(contours, copy)
         print("--- %s seconds ---" % (time.time() - start))
+
+
+        unsorted_list = []
+        features = []
+
+        i = 1
+        reverse = False
+        #boundingBoxes = [cv2.boundingRect(c) for c in contours]
+        #(cnts, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes),
+        #key=lambda b:b[1][i], reverse=reverse))
+
         
         for i in range(len(contours)):
             
@@ -83,9 +88,32 @@ class User_Window(Window):
                          (x, y),        # Start
                          (x+w,y+h),     # End
                          (255, 0, 0),   # BGR value (RGB backwards)
-                          2)            # Thickness       
+                          2)            # Thickness
+
+            imgROI = image[y:y+h, x:x+w]
+
+            cv2.imshow("hello", imgROI)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
+            unsorted_list.append([x + ((y*h)/2)*7,self.get_feature(imgROI)])
+
+            self.net.print(self.get_feature(imgROI))
 
 
-        self.destroy()
+        
+        unsorted_list.sort(key = lambda x: x[0])
+
+        
+            
+
+
+        for i in unsorted_list:
+            print(i[0])
+            self.net.print(i[1])
+
+        #list = [9575.0, 4965.0, 4210.5, 4694.0]
+
+            
+        #self.destroy()
         cv2.imshow("user_input", copy)
         cv2.waitKey(0)

@@ -12,7 +12,7 @@ class Letter_Window(Window):
 
         self.bind("<Return>", lambda e:self.addData())
         # List of data to save 
-        self.dataList = []
+        #self.dataList = []
         self.features = []
 
         # number of times to collect data for letter
@@ -77,72 +77,14 @@ class Letter_Window(Window):
                           2)            # Thickness       
 
             
-            # Region of interest is our rectangle
-            # Apparently our imgROI isn't read in as 0's and 255's
-            # Even if we save as a .TIFF
+
             imgROI = image[y:y+h, x:x+w]
 
-        
-            # Resize letter to make them all in a uniform size
-            # Not square because alot of letters are tall
-            # Don't want to stretch them too much
-            resized = cv2.resize(imgROI, (20,40))
-
-            # Convert values to only (255,255,255) and (0,0,0)
-            ones_and_nan = (resized/resized)
-            binary = np.nan_to_num(ones_and_nan)
-            only_white = np.multiply(255,binary)
-            displayable = only_white.astype(np.uint8)
+            new_feature = self.get_feature(imgROI)
             
-            self.dataList.append(displayable)
-
-            #cv2.imshow("hi", displayable)
-            cv2.waitKey(0)
-
-            feature = []
-            summed = 0
-
+            self.features.append(new_feature)
             
-            m = displayable
-            for i in range(0,40,4):
-                
-                for j in range(0,20,4):
-
-
-                    # Top left square
-                    summed += m[i][j][0]
-                    summed += m[i][j+1][0]
-                    summed += m[i+1][j][0]
-                    summed += m[i+1][j+1][0]
-
-                    # Bottom left square
-                    summed += m[i+2][j][0]
-                    summed += m[i+2][j+1][0]
-                    summed += m[i+3][j][0]
-                    summed += m[i+3][j+1][0]
-                    
-                    # Top right square
-                    summed += m[i][j+2][0]
-                    summed += m[i][j+3][0]
-                    summed += m[i+1][j+2][0]
-                    summed += m[i+1][j+3][0]
-
-                    
-                    # Bottom right sqaure
-                    summed += m[i+2][j+2][0]
-                    summed += m[i+2][j+3][0]
-                    summed += m[i+3][j+2][0]
-                    summed += m[i+3][j+3][0]
-
-                    feature.append(summed)
-                    summed = 0
-                    
-
-            zero_and_one = np.divide(feature,4080)
-            print(zero_and_one)
-            self.features.append(np.divide(feature,4080))
-            
-            if(len(self.dataList) >= self.iterations):
+            if(len(self.features) >= self.iterations):
 
                 img_dir = "data/images/" + self.filename + ".npz"
                 feature_dir = "data/features/" + self.filename + ".npz"
@@ -156,10 +98,10 @@ class Letter_Window(Window):
                     feature_data = np.load(feature_dir)
                 
                 except Exception as e:
-                    np.savez(img_dir, *self.dataList)
+                    #np.savez(img_dir, *self.dataList)
                     np.savez(feature_dir, *self.features)
                     print(str(e))
-                    print("Created new file -> ", img_dir)
+                    #print("Created new file -> ", img_dir)
                     print("Created new file -> ", feature_dir)
                     self.destroy()
                     return
@@ -178,8 +120,8 @@ class Letter_Window(Window):
                     old_features.append((feature_data[key]))
 
                 # Add new data to array
-                for new_img in self.dataList:
-                    old_imgs.append(new_img)
+                #for new_img in self.dataList:
+                #    old_imgs.append(new_img)
 
                     
                 # Add new data to array

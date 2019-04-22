@@ -189,3 +189,62 @@ class Window(Tk):
             self.drew = False
                     
 
+    def get_feature(self, imgROI):
+
+            print("HELLO IM IN GET_FEATURE")
+            # Resize letter to make them all in a uniform size
+            # Not square because alot of letters are tall
+            # Don't want to stretch them too much
+            resized = cv2.resize(imgROI, (20,40))
+
+            # Convert values to only (255,255,255) and (0,0,0)
+            ones_and_nan = (resized/resized)
+            binary = np.nan_to_num(ones_and_nan)
+            only_white = np.multiply(255,binary)
+            displayable = only_white.astype(np.uint8)
+            
+
+
+            feature = []
+            summed = 0
+
+            
+            m = displayable
+            for i in range(0,40,4):
+                
+                for j in range(0,20,4):
+
+
+                    # Top left square
+                    summed += m[i][j][0]
+                    summed += m[i][j+1][0]
+                    summed += m[i+1][j][0]
+                    summed += m[i+1][j+1][0]
+
+                    # Bottom left square
+                    summed += m[i+2][j][0]
+                    summed += m[i+2][j+1][0]
+                    summed += m[i+3][j][0]
+                    summed += m[i+3][j+1][0]
+                    
+                    # Top right square
+                    summed += m[i][j+2][0]
+                    summed += m[i][j+3][0]
+                    summed += m[i+1][j+2][0]
+                    summed += m[i+1][j+3][0]
+
+                    
+                    # Bottom right sqaure
+                    summed += m[i+2][j+2][0]
+                    summed += m[i+2][j+3][0]
+                    summed += m[i+3][j+2][0]
+                    summed += m[i+3][j+3][0]
+
+                    feature.append(summed)
+                    summed = 0
+                    
+
+            normalized = np.divide(feature,4080)
+
+            print(normalized)
+            return normalized

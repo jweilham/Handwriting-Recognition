@@ -32,22 +32,28 @@ class Neural_Network():
         return one_hot_labels
 
 
+    def save(self):
+
+        np.savez("./data/network/wh.npz", one = wh)
+        np.savez("./data/network/bh.npz", one = bh)
+        np.savez("./data/network/wo.npz", one = wo)
+        np.savez("./data/network/bo.npz", one = bo)
         
     def load(self):
 	
         try:
-                h = np.load("./wh.npz")
-                hb = np.load("./bh.npz")
-                o = np.load("./wo.npz")
-                ob = np.load("./bo.npz")
-                self.loaded = True
+                h = np.load("./data/network/wh.npz")
+                hb = np.load("./data/network/bh.npz")
+                o = np.load("./data/network/wo.npz")
+                ob = np.load("./data/network/bo.npz")
+                
                 
                 one = "one"
                 self.wh = h[one]
                 self.bh = hb[one]
                 self.wo = o[one]
                 self.bo = ob[one]
-                
+                self.loaded = True
                 
 
         except Exception as e:
@@ -69,45 +75,40 @@ class Neural_Network():
 
         feature_set = np.vstack(feature_array)
 
-        # How many features do we have
+
+        one_hot_labels = self.one_hot(labels)
         instances = feature_set.shape[0]
 
-        # Size of each feature (dimensionss)
         attributes = feature_set.shape[1]
-
-        print("instances", instances)
-        print("attributes", attributes)
-        
-        one_hot_labels = self.one_hot(labels)
-
 
         hidden_nodes = 50  
         output_labels = 26
 
 
         # Weights to hidden nodes/Bias of nodes
-        self.wh = np.random.rand(attributes,hidden_nodes)
-        self.bh = np.random.randn(hidden_nodes)
+        wh = np.random.rand(attributes,hidden_nodes)
+        bh = np.random.randn(hidden_nodes)
 
         # Weights to the output nodes/Bias of nodes
-        self.wo = np.random.rand(hidden_nodes,output_labels)
-        self.bo = np.random.randn(output_labels)
+        wo = np.random.rand(hidden_nodes,output_labels)
+        bo = np.random.randn(output_labels)
 
-        
+
+
         # Learning rate
         lr = 0.005
 
         error_cost = []
 
-        for epoch in range(10000):  
+        for epoch in range(iterations):  
         ############# feedforward
 
             # Phase 1
-            zh = np.dot(feature_set, self.wh) + self.bh
+            zh = np.dot(feature_set, wh) + bh
             ah = self.sigmoid(zh)
 
             # Phase 2
-            zo = np.dot(ah, self.wo) + self.bo
+            zo = np.dot(ah, wo) + bo
             ao = self.softmax(zo)
 
 
@@ -125,7 +126,7 @@ class Neural_Network():
 
         ########## Phases 2
 
-            dzo_dah = self.wo
+            dzo_dah = wo
             dcost_dah = np.dot(dcost_dzo , dzo_dah.T)
             dah_dzh = self.sigmoid_der(zh)
             dzh_dwh = feature_set
@@ -135,17 +136,22 @@ class Neural_Network():
 
             # Update Weights ================
 
-            self.wh -= lr * dcost_wh
-            self.bh -= lr * dcost_bh.sum(axis=0)
+            wh -= lr * dcost_wh
+            bh -= lr * dcost_bh.sum(axis=0)
 
-            self.wo -= lr * dcost_wo
-            self.bo -= lr * dcost_bo.sum(axis=0)
+            wo -= lr * dcost_wo
+            bo -= lr * dcost_bo.sum(axis=0)
 
             if epoch % 200 == 0:
                 loss = np.sum(-one_hot_labels * np.log(ao))
                 #print('Loss function value: ', loss)
                 error_cost.append(loss)
                 print("loss: " , loss)
+
+        self.bh = bh
+        self.wh = wh
+        self.wo = wo
+        self.bo = bo
 
 				
     # returns output number it thinks it is		
@@ -163,6 +169,7 @@ class Neural_Network():
 
 
     def print(self, feature):
+        
     
         prediction = self.outputs[self.think(feature)]
         print("I think it's an: ", prediction)
@@ -191,7 +198,7 @@ def loadee():
         loader(letter)
 
 
-
+'''
 loadee()
 
 
@@ -230,9 +237,11 @@ n.train(inputs, training_outputs, 50000)
 
 n.print(test_data[0])
 
+n.save()
+
 
 one_hot_labels = np.zeros((len(labels), 26))
-
+'''
 
 
 
