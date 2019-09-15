@@ -4,6 +4,11 @@ from string import ascii_lowercase
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
 
+# Neural net implementation obtained from
+# https://stackabuse.com/creating-a-neural-network-from-scratch-in-python-multi-class-classification/
+
+
+
 class Neural_Network():
     
     def __init__(self):
@@ -26,7 +31,7 @@ class Neural_Network():
         
         for i in range(len(labels)):  
             one_hot_labels[i, labels[i]] = 1
-            print(one_hot_labels[i])
+            #print(one_hot_labels[i])
 
     
         return one_hot_labels
@@ -34,10 +39,10 @@ class Neural_Network():
 
     def save(self):
 
-        np.savez("./data/network/wh.npz", one = wh)
-        np.savez("./data/network/bh.npz", one = bh)
-        np.savez("./data/network/wo.npz", one = wo)
-        np.savez("./data/network/bo.npz", one = bo)
+        np.savez("./data/network/wh.npz", one = self.wh)
+        np.savez("./data/network/bh.npz", one = self.bh)
+        np.savez("./data/network/wo.npz", one = self.wo)
+        np.savez("./data/network/bo.npz", one = self.bo)
         
     def load(self):
 	
@@ -75,7 +80,6 @@ class Neural_Network():
 
         feature_set = np.vstack(feature_array)
 
-
         one_hot_labels = self.one_hot(labels)
         instances = feature_set.shape[0]
 
@@ -84,7 +88,6 @@ class Neural_Network():
         hidden_nodes = 50  
         output_labels = 26
 
-
         # Weights to hidden nodes/Bias of nodes
         wh = np.random.rand(attributes,hidden_nodes)
         bh = np.random.randn(hidden_nodes)
@@ -92,8 +95,6 @@ class Neural_Network():
         # Weights to the output nodes/Bias of nodes
         wo = np.random.rand(hidden_nodes,output_labels)
         bo = np.random.randn(output_labels)
-
-
 
         # Learning rate
         lr = 0.005
@@ -110,8 +111,6 @@ class Neural_Network():
             # Phase 2
             zo = np.dot(ah, wo) + bo
             ao = self.softmax(zo)
-
-
 
         ########## Back Propagation
 
@@ -144,7 +143,7 @@ class Neural_Network():
 
             if epoch % 200 == 0:
                 loss = np.sum(-one_hot_labels * np.log(ao))
-                #print('Loss function value: ', loss)
+                print('Loss function value: ', loss)
                 error_cost.append(loss)
                 print("loss: " , loss)
 
@@ -169,79 +168,6 @@ class Neural_Network():
 
 
     def print(self, feature):
-        
-    
-        prediction = self.outputs[self.think(feature)]
-        print("I think it's an: ", prediction)
-
-
-
-
-data = []
-test_data = []
-
-
-def loader(letter):
-    l = []
-    for key in letter:
-        l.append(letter[key])
-
-    #print(len(l))
-    data.append(l)
-    test_data.append(l[16])
-
-def loadee():
-    
-    for i in ascii_lowercase:
-        print("loading: ", i)
-        letter = np.load("./data/features/" + i + ".npz")
-        loader(letter)
-
-
-'''
-loadee()
-
-
-labels = [0]*416
-counter = 0
-let = 0
-for i in range(len(labels)):
-    labels[i] = let
-    counter += 1
-
-    if(not(counter%16)):
-        let += 1
-
-
-print(labels)
-
-plz = []
-ans = []
-
-
-for i in data:
-    for j in range(len(i)-2):
-        #print(j)
-        plz.append(i[j])
-
-
-
-training_outputs = np.array(labels)
-
-inputs = np.array(plz)
-
-
-n = Neural_Network()
-
-n.train(inputs, training_outputs, 50000)
-
-n.print(test_data[0])
-
-n.save()
-
-
-one_hot_labels = np.zeros((len(labels), 26))
-'''
-
-
-
+        return
+        #prediction = self.outputs[self.think(feature)]
+        #print("I think it's an: ", prediction)

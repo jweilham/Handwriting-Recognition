@@ -191,7 +191,7 @@ class Window(Tk):
 
     def get_feature(self, imgROI):
 
-            print("HELLO IM IN GET_FEATURE")
+            #print("HELLO IM IN GET_FEATURE")
             # Resize letter to make them all in a uniform size
             # Not square because alot of letters are tall
             # Don't want to stretch them too much
@@ -246,5 +246,5 @@ class Window(Tk):
 
             normalized = np.divide(feature,4080)
 
-            print(normalized)
+            #print(normalized)
             return normalized

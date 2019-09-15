@@ -122,7 +122,7 @@ def iterate(contours, function, img):
             
         i += 1
 
-    print("end iterate")
+    #print("end iterate")
     
 def rectangle(c1, c2):
     # (x,y) is top left corner of rectangle

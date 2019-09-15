@@ -10,13 +10,13 @@ class User_Window(Window):
     def __init__(self):
         Window.__init__(self, w = 700, h = 500)
         
-	# Update menubar
+	    # Update menubar
         self.menubar.insert_command(0, label = "Save & Quit", command=self.saveq)
         self.menubar.insert_command(0, label = "Use last input", command=self.last)
         self.config(menu=self.menubar)
         
         self.net = Neural_Network()
-        self.net.load()
+        #self.net.load() # used if you want to use saved neural net state
 
         #for K nearest Neighbors
         self.data = []
@@ -34,71 +34,58 @@ class User_Window(Window):
     def load_knn(self):
 
 
-        self.loadee()
-        labels = [0]*416
+        self.load_data()
+        print("DATA LENGTH: ", len(self.data))
+        # Makes labels array, 
+        labels = [0]*(len(self.data))*(len(self.data[0]))
         counter = 0
         let = 0
+        training_data = []
+
         for i in range(len(labels)):
             labels[i] = let
             counter += 1
 
-            if(not(counter%16)):
+            #print("COUNTER ", counter, " LENGTH of data[counter] ", len(self.data[counter]))
+            #print("logic: ", counter%(len(self.data[counter])))
+            if(not(counter%(len(self.data[counter])))):
+                counter = 0
                 let += 1
 
-        plz = []
-        test = []
+        print(labels)
+
+        testing_data = []
         count = 0
         for i in self.data:
-            for j in range(len(i)-2):
-                #print(j)
-                plz.append(i[j])
-
-            test.append(self.test_data[count])
+            for j in range(len(i)):
+                training_data.append(i[j])
             
             count +=1
 
+        self.net.train(training_data, labels, 1500)
+        self.net.save()
+    
+    def load_letter(self, letter):
 
-        self.knn.fit(plz, labels)
-        KNeighborsClassifier(algorithm='auto', 
-                     leaf_size=30, 
-                     metric='minkowski',
-                     metric_params=None, 
-                     n_jobs=1, 
-                     n_neighbors=5, 
-                     p=2,
-                     weights='uniform')
-        
-        #print("Predictions form the classifier:")
-        #print(self.knn.predict(test))
-        #print("Target values:")
-        #rint([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25])
-
-
-        
-    def loader(self, letter):
-
-        print("loader!")
         l = []
         for key in letter:
             l.append(letter[key])
-
-        #print(len(l))
+            
         self.data.append(l)
-        #print("loading => ", l[16])
-        self.test_data.append(l[16])
-        #print("test_data: ", self.test_data)
 
-    def loadee(self):
+    def load_data(self):
         
         for i in ascii_lowercase:
             print("loading: ", i)
             letter = np.load("./data/features/" + i + ".npz")
-            self.loader(letter)
+            self.load_letter(letter)
+
     def last(self):
         
         self.display()
 
     def display(self):
+        
         # Reads in our image as a numpy array
         image = cv2.imread("user_input/" + self.filename + ".TIFF")
         
@@ -128,63 +115,35 @@ class User_Window(Window):
             print(type([hull]))
             cv2.drawContours(copy, [hull], -1, (0, 0, 255), 1)
 
-
-
-        
         cv2.imshow('convex hull', copy)
         cv2.waitKey(0)
-
-        
 
         start = time.time()
         
         letter_detection.beautify(contours, copy)
         print("--- %s seconds ---" % (time.time() - start))
 
-
         unsorted_list = []
         features = []
 
         i = 1
         reverse = False
-        #boundingBoxes = [cv2.boundingRect(c) for c in contours]
-        #(cnts, boundingBoxes) = zip(*sorted(zip(contours, boundingBoxes),
-        #key=lambda b:b[1][i], reverse=reverse))
-
         
         for i in range(len(contours)):
             
             x,y,w,h = cv2.boundingRect(contours[i])
-     
-            #cv2.rectangle(copy,         # Draw rectangle on temporary copy
-             #            (x, y),        # Start
-              #           (x+w,y+h),     # End
-               #          (255, 0, 0),   # BGR value (RGB backwards)
-                #          2)            # Thickness
 
             imgROI = image[y:y+h, x:x+w]
 
-            #cv2.imshow("hello", imgROI)
-            #cv2.waitKey(0)
-            #cv2.destroyAllWindows()
+            # Give height and x value weights to try and sort them Left to Right, Top to Bottom
             unsorted_list.append([x + (y+h)*5,self.get_feature(imgROI),contours[i]])
 
-            #self.net.print(self.get_feature(imgROI))
-
-
-        
         unsorted_list.sort(key = lambda x: x[0])
 
-
-
-        
-            
-
-
+        # neural net output
+        print("neural net output")
         for i in unsorted_list:
-            print(i[0])
-            self.net.print(i[1])
-            print("knn thinkgs it's a: ", ascii_lowercase[int(self.knn.predict([i[1]])[0])])
+            print(ascii_lowercase[self.net.think(i[1])])
             x,y,w,h = cv2.boundingRect(i[2])
      
             cv2.rectangle(copy,         # Draw rectangle on temporary copy
@@ -199,8 +158,21 @@ class User_Window(Window):
             cv2.waitKey(0)
             cv2.destroyAllWindows()
             
+        for i in unsorted_list:
             
+            x,y,w,h = cv2.boundingRect(i[2])
+     
+            cv2.rectangle(copy,         # Draw rectangle on temporary copy
+                         (x, y),        # Start
+                         (x+w,y+h),     # End
+                         (255, 0, 0),   # BGR value (RGB backwards)
+                          2)            # Thickness
+
+            imgROI = image[y:y+h, x:x+w]
+
+            cv2.imshow("hello", imgROI)
+            cv2.waitKey(0)
+            cv2.destroyAllWindows()
             
-        #self.destroy()
         cv2.imshow("user_input", copy)
         cv2.waitKey(0)

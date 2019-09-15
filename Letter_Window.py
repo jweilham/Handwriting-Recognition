@@ -52,8 +52,8 @@ class Letter_Window(Window):
             rect_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (9, 30))
             dilated = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, rect_kernel)
 
-            cv2.imshow("dialated", dilated)
-            cv2.waitKey(0)
+            #cv2.imshow("dialated", dilated)
+            #cv2.waitKey(0)
         
             
             contours, hierarchy = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
