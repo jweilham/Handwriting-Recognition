@@ -8,6 +8,10 @@ Current capabilities of this program include
 - Function to create feature arrays from image on canvas
 - Letter window to collect data that is used for training the neural net
 - User Window that allows user to write their own message and have it interpreted by the Neural Network
+    - Allows user to write on canvas
+    - Erase writing
+    - Undo last drawing
+    - Save state of window
 - Uses OpenCV to recognize letters on canvas separately.
     - Added functionality to detect i's and j's correctly (dots and lines originally detected as two 
       separate objects)
