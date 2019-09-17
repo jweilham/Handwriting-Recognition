@@ -1,6 +1,7 @@
 # Handwriting-Recognition
 
-AI program to recognize handwriting.
+AI program to recognize handwriting. 
+Currently prints out results in the console along with percentage of which letter it thought it was.
 
 Current capabilities of this program include
 - Currently using a simple one layer neural network to identify lowercase characters of the alphabet.
@@ -20,6 +21,7 @@ Required Python3.0+ Libraries
 4. pillow
 
 # Future Work
+- Add improved results printing for user (allow them to type sentences just by writing) -> close!
 - Add more layers to the neural network.
 - Implement my own Neural network/use popular library to achieve higher accuracy.
 - Bring in more data (online) greater volume when training NN.
