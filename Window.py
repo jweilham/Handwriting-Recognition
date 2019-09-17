@@ -100,19 +100,19 @@ class Window(Tk):
                             drawable_x1,     drawable_y1)).save(filename+".TIFF")
 
 
+    # Undo last pen drawing
     def undo(self):
             
         if(len(self.previous_moves)):
             
             undo = self.previous_moves[self.clicks]
-
             for obj in undo:
                 
                 self.drawing_area.create_line(obj[0], obj[1],
                                              obj[2],  obj[3],
                                              smooth=TRUE,     width = obj[4], fill = obj[5])
 
-    
+
             self.previous_moves.pop(self.clicks)
             self.clicks -= 1
 
@@ -188,7 +188,9 @@ class Window(Tk):
             
             self.drew = False
                     
+                
 
+    # Method to get feature array out of image on the window
     def get_feature(self, imgROI):
 
             #print("HELLO IM IN GET_FEATURE")
@@ -244,7 +246,7 @@ class Window(Tk):
                     summed = 0
                     
 
+            # Divide by max value of a sqaure to normalize and give ratio per quadrant
             normalized = np.divide(feature,4080)
 
-            #print(normalized)
             return normalized

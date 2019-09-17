@@ -6,8 +6,13 @@ import letter_detection     # detecting i's and j's
 from Letter_Window import *
 from User_Window import *
 from string import ascii_lowercase
-# Create and fit a nearest-neighbor classifier
-from sklearn.neighbors import KNeighborsClassifier
+
+
+def main():
+
+    #get_data()
+    gui = User_Window()
+    gui.mainloop()
 
 
 def get_data():
@@ -15,12 +20,6 @@ def get_data():
     for i in ascii_lowercase:
         x = Letter_Window(i, 10)
         x.mainloop()
-
-def main():
-
-    #get_data()
-    y = User_Window()
-    y.mainloop()
 
 
 if __name__ == "__main__":

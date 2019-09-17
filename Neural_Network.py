@@ -4,7 +4,7 @@ from string import ascii_lowercase
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
 
-# Neural net implementation obtained from
+# Most of neural net implementation obtained from
 # https://stackabuse.com/creating-a-neural-network-from-scratch-in-python-multi-class-classification/
 
 

@@ -118,10 +118,7 @@ class User_Window(Window):
         cv2.imshow('convex hull', copy)
         cv2.waitKey(0)
 
-        start = time.time()
-        
         letter_detection.beautify(contours, copy)
-        print("--- %s seconds ---" % (time.time() - start))
 
         unsorted_list = []
         features = []
@@ -144,22 +141,6 @@ class User_Window(Window):
         print("neural net output")
         for i in unsorted_list:
             print(ascii_lowercase[self.net.think(i[1])])
-            x,y,w,h = cv2.boundingRect(i[2])
-     
-            cv2.rectangle(copy,         # Draw rectangle on temporary copy
-                         (x, y),        # Start
-                         (x+w,y+h),     # End
-                         (255, 0, 0),   # BGR value (RGB backwards)
-                          2)            # Thickness
-
-            imgROI = image[y:y+h, x:x+w]
-
-            cv2.imshow("hello", imgROI)
-            cv2.waitKey(0)
-            cv2.destroyAllWindows()
-            
-        for i in unsorted_list:
-            
             x,y,w,h = cv2.boundingRect(i[2])
      
             cv2.rectangle(copy,         # Draw rectangle on temporary copy
