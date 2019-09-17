@@ -35,9 +35,18 @@ class User_Window(Window):
 
 
         self.load_data()
-        print("DATA LENGTH: ", len(self.data))
-        # Makes labels array, 
-        labels = [0]*(len(self.data))*(len(self.data[0]))
+        labels = [0]
+
+        num_of_features = 0
+
+        # Makes labels array,
+        for i in self.data:
+            num_of_features += len(i)
+
+        print("features", num_of_features)
+
+        labels = [0]*(num_of_features)
+
         counter = 0
         let = 0
         training_data = []
@@ -46,13 +55,9 @@ class User_Window(Window):
             labels[i] = let
             counter += 1
 
-            #print("COUNTER ", counter, " LENGTH of data[counter] ", len(self.data[counter]))
-            #print("logic: ", counter%(len(self.data[counter])))
             if(not(counter%(len(self.data[counter])))):
                 counter = 0
                 let += 1
-
-        print(labels)
 
         testing_data = []
         count = 0

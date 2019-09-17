@@ -101,7 +101,6 @@ class Letter_Window(Window):
                     #np.savez(img_dir, *self.dataList)
                     np.savez(feature_dir, *self.features)
                     print(str(e))
-                    #print("Created new file -> ", img_dir)
                     print("Created new file -> ", feature_dir)
                     self.destroy()
                     return

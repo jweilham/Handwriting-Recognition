@@ -8,42 +8,45 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.3f}".format(x)})
 # https://stackabuse.com/creating-a-neural-network-from-scratch-in-python-multi-class-classification/
 
 
-
 class Neural_Network():
     
     def __init__(self):
-        # seeding for random number generation
-        np.random.seed(420)
 
+        np.random.seed(200)
+
+        # Weights and bias of hidden layer nodes
         self.wh = None
         self.bh = None
         
+        # Weights and bias of output layer nodes
         self.wo = None
         self.bo = None
+
+        # For saving net state
         self.loaded = False
-        
+
         self.outputs = ascii_lowercase
         
-        
+    
     def one_hot(self, labels):
 
         one_hot_labels = np.zeros((len(labels), 26))
         
         for i in range(len(labels)):  
             one_hot_labels[i, labels[i]] = 1
-            #print(one_hot_labels[i])
-
     
         return one_hot_labels
 
 
+    # Save weights for NN
     def save(self):
 
         np.savez("./data/network/wh.npz", one = self.wh)
         np.savez("./data/network/bh.npz", one = self.bh)
         np.savez("./data/network/wo.npz", one = self.wo)
         np.savez("./data/network/bo.npz", one = self.bo)
-        
+    
+    # Load weights
     def load(self):
 	
         try:
@@ -64,18 +67,19 @@ class Neural_Network():
         except Exception as e:
                 print(str(e))
                 
-
+    # Used to normalize weights at each layer
     def sigmoid(self, x):  
         return 1/(1+np.exp(-x))
 
     def sigmoid_der(self, x):  
         return self.sigmoid(x) *(1-self.sigmoid (x))
 
+    # Returns array of percentages for which letter the NN thinks the input is
     def softmax(self, A, axel = 1):  
         expA = np.exp(A)
         return expA / expA.sum(axis=axel, keepdims=True)
 
-
+    # Updates weights based on feature array as input
     def train(self, feature_array, labels, iterations):
 
         feature_set = np.vstack(feature_array)
@@ -102,7 +106,7 @@ class Neural_Network():
         error_cost = []
 
         for epoch in range(iterations):  
-        ############# feedforward
+            ############# feedforward
 
             # Phase 1
             zh = np.dot(feature_set, wh) + bh
@@ -112,9 +116,9 @@ class Neural_Network():
             zo = np.dot(ah, wo) + bo
             ao = self.softmax(zo)
 
-        ########## Back Propagation
+            ########## Back Propagation
 
-        ########## Phase 1
+            ########## Phase 1
 
             dcost_dzo = ao - one_hot_labels
             dzo_dwo = ah
@@ -123,7 +127,7 @@ class Neural_Network():
 
             dcost_bo = dcost_dzo
 
-        ########## Phases 2
+            ########## Phases 2
 
             dzo_dah = wo
             dcost_dah = np.dot(dcost_dzo , dzo_dah.T)
@@ -165,9 +169,3 @@ class Neural_Network():
 
         print(ao)
         return np.argmax(ao)
-
-
-    def print(self, feature):
-        return
-        #prediction = self.outputs[self.think(feature)]
-        #print("I think it's an: ", prediction)
